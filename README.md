@@ -2,7 +2,6 @@
 This is a demo project with samples for :
 <ul>
 <li>Score based Voting using Ethereum Smart Contracts</li>
-<li>IPFS</li>
 </ul>
 
 <p>It uses ReactJS as the frontend framework, bootstrap for layouts, webpack for packaging.<p>
