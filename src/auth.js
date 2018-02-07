@@ -31,7 +31,7 @@ export default class Auth extends Component {
 
   unlockaccount = () => {
 
-    let id = this.props.bidderId;
+    let id = this.props.userId;
     let phrase = this.refs.phrase.value;
     console.log(id + ' ' + phrase);
     
@@ -65,7 +65,7 @@ export default class Auth extends Component {
                  <tbody>
                     <tr>
                       <td>Account Id</td>
-                      <td>{this.props.bidderId}</td>
+                      <td>{this.props.userId}</td>
                     </tr>
                     <tr>
                       <td>Password</td>
@@ -101,7 +101,7 @@ export default class Auth extends Component {
 
 Auth.propTypes = {
   resultCallback: PropTypes.func.isRequired,
-  bidderId: PropTypes.string.isRequired,
+  userId: PropTypes.string.isRequired,
   //use this to pass values that will be passed back to the caller
   stateProps: PropTypes.array
 

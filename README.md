@@ -17,13 +17,13 @@ to validate and get details of voters voting for options.
 
 <p>After the deployment of contracts to the blockchain the flow at a high level is as follows:
 <ol>
-<li>Admin creates a list of Options for the survey</li>
+<li>Admin creates a list of Options for the survey.</li>
 <li>Admin also creates a list of users using just the names.</li>
 <li>User registers by selecting his name and generates a wallet for himself. This will require a password too. (not providing update of password for now),</li>
 <li>User goes to Survey options list. and selects a score for each option. Score to be between 1 and n where 'n' being the number of options available</li>
 <li>User can cancel anytime before submitting his survey</li>
-<li>Submitting the survey needs the password used while creating wallet. Once submitted he/she cannot vote again.</li>
-<li>Once survey is over. i.e. all users have voted Admin can go and look at results.</li>
+<li>A voter needs the password used while creating wallet to vote. Once voted he/she cannot vote again.</li>
+<li>Once voting is over. i.e. all users have voted Admin can go and look at results.</li>
 </ol>
 
 <p>A known issue for now would be

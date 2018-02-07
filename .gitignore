@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/migrations
 
 # generated contract code
 /src/contracts
