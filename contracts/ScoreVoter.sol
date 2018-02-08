@@ -68,13 +68,13 @@ contract ScoreVoter {
     event InProcess(address voter);
     
     //if a given user id does not exist in system    
-    event InvalidUserId(address);
+    event InvalidUserId(address userId);
     
     //when a user's is is updated successfully with wallet address
-    event WalletUpdateSuccess(address);
+    event WalletUpdateSuccess(address walletaddr);
 
     //when a user's is is updated successfully with wallet address
-    event IncomleteVoting(address);
+    event IncomleteVoting(address voter);
 
 
 

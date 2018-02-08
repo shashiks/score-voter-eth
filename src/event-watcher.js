@@ -1,62 +1,83 @@
-export function   watchEvents (bidAuction, itemId, callback) {
+export function   watchEvents (contract, contractId, callback) {
 
       //console.log(" from watcher   " + bidAuction + " " + itemId + " " + callback);
 
-      var bidEvent = bidAuction.BidCreated({fromBlock: 'latest', toBlock: 'latest', address : itemId});
-          bidEvent.watch(function(error, result){
+      var startVote = contract.StartVote({fromBlock: 'latest', toBlock: 'latest', address : contractId});
+          startVote.watch(function(error, result){
               if(!error) {
-                callback("Bid received for Ticket Id " + result.args.pTicketId + " of amount " + result.args.bidAmount+ " from address " + result.args.bidder, false, true);
+                callback("Voting Started by Account Id : " + result.args.voter, false, true);
               } else {
-                callback("Err in BidCreated event "+ error, true, true);
+                callback("Err in StartVote event "+ error, true, true);
               }
           });
 
-        var highEvent = bidAuction.HighestBid({fromBlock: 'latest', toBlock: 'latest', address : itemId});
-          highEvent.watch(function(error, result){
+        var endVote = contract.EndVote({fromBlock: 'latest', toBlock: 'latest', address : contractId});
+          endVote.watch(function(error, result){
               if(!error) {
-                callback("Highest bid received for Ticket Id " + result.args.pTicketId + " of amount " + result.args.bidAmount + " from address " + result.args.bidder, false, true);
+                callback("Vote submitted by : " + result.args.voter, false, true);
               } else {
-                callback("Err in Highest Bid event "+ error, true, true);
+                callback("Err in EndVote event "+ error, true, true);
               }
           });
 
-        var errEvent = bidAuction.BidError({fromBlock: 'latest', toBlock: 'latest', address : itemId});
-          errEvent.watch(function(error, result){
+        var cancelVote = contract.CancelVote({fromBlock: 'latest', toBlock: 'latest', address : contractId});
+          cancelVote.watch(function(error, result){
               if(!error) {
-                callback(" Invalid Bid of amount " + result.args.bidAmount
-                + " from address " + result.args.bidder + " <p> Error:  " +  getErrMsg(result.args.errorCode.toString()), true, true);
+                callback(" Voting cancelled by : " + result.args.voter, false, true);
               }
               else {
-                callback("Err in BidError event "+ error, true, true);
+                callback("Err in CancelVote event "+ error, true, true);
               }
           });
 
-          var tktEvent = bidAuction.TicketAlloted({fromBlock: 'latest', toBlock: 'latest', address : itemId});
-          tktEvent.watch(function(error, result){
+          var doubleVoting = contract.DoubleVoting({fromBlock: 'latest', toBlock: 'latest', address : contractId});
+          doubleVoting.watch(function(error, result){
               if(!error) {
-                callback("Ticket Id " + result.args.pTicketId + " alloted to " + result.args.bidder+ " for amount " + result.args.bidAmount, false, true);
+                callback("Double voting! User has already voted : " + result.args.voter, true, true);
               } else {
-                callback("Err in TicketAlloted event "+ error, true, true);
+                callback("Err in DoubleVoting event "+ error, true, true);
               }
           });
+
+
+    var inProcess = contract.InProcess({fromBlock: 'latest', toBlock: 'latest', address : contractId});
+          inProcess.watch(function(error, result){
+              if(!error) {
+                callback("User voting already under process : " + result.args.voter, false, true);
+              } else {
+                callback("Err in InProcess event "+ error, true, true);
+              }
+          });
+
+        var invalidUserId = contract.InvalidUserId({fromBlock: 'latest', toBlock: 'latest', address : contractId});
+          invalidUserId.watch(function(error, result){
+              if(!error) {
+                callback("Invalid user id : " + result.args.userId + " Id not registered for voting", true, true);
+              } else {
+                callback("Err in InvalidUserId event "+ error, true, true);
+              }
+          });
+
+        var walletUpdateSuccess = contract.WalletUpdateSuccess({fromBlock: 'latest', toBlock: 'latest', address : contractId});
+          walletUpdateSuccess.watch(function(error, result){
+              if(!error) {
+                callback( " Account updated successfully with  account Id : " + result.args.walletaddr, false, true);
+              }
+              else {
+                callback("Err in walletUpdateSuccess event "+ error, true, true);
+              }
+          });
+
+          var incomleteVoting = contract.IncomleteVoting({fromBlock: 'latest', toBlock: 'latest', address : contractId});
+          incomleteVoting.watch(function(error, result){
+              if(!error) {
+                callback("Incomplete voting for user Id : " + result.args.voter , true, true);
+              } else {
+                callback("Err in IncomleteVoting event "+ error, true, true);
+              }
+          });
+
 }
 
 
-
-export function getErrMsg(errCode){
-  
-  var resMsg = errCode + " : ";
-  if(errCode === '100' ) {
-    resMsg += "Bid Amount cannot be less than minimum bid amount";
-  } else if(errCode === '101'|| errCode === '500') {
-    resMsg += "The Auction has expired!";
-  } else if(errCode === '102') {
-    resMsg += "Bidder has been alloted maximum allowed tickets for this Auction";
-  } else if(errCode === '103') {
-    resMsg += "Current bid cannot be less than previous bid for this ticket";
-  }
-  return resMsg;
-}
-
-
-export default {watchEvents, getErrMsg}
+export default {watchEvents}

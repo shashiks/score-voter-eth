@@ -43,7 +43,7 @@ export default class Admin extends Component {
 
   componentDidMount() {
     this.props.notifier(null,false,false,true);
-    this.props.onContractDetails(UserRepository, ScoreVoter);
+    // this.props.onContractDetails(UserRepository, ScoreVoter);
 
   }
 

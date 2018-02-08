@@ -5,10 +5,13 @@ import Admin from './Admin.js'
 import UserMgmt from './UserMgmt.js'
 import OptMgmt from './OptMgmt.js'
 import userRepository from './contracts/UserRepositoryImpl.json'
+import scoreVoter from './contracts/ScoreVoter.json'
 import { default as contract } from 'truffle-contract'
 import { default as Web3} from 'web3'
 import Vote from './Vote.js'
 import Result from './Result.js'
+
+import {watchEvents} from './event-watcher.js'
 
 //import {watchEvents} from './event-watcher.js'
 
@@ -16,6 +19,7 @@ import Result from './Result.js'
 
   var web3 = null;
   var UserRepository = contract(userRepository);
+  var ScoreVoter = contract(scoreVoter);
   var me = null;
 
 class App extends Component {
@@ -29,7 +33,7 @@ class App extends Component {
        web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:9090"));
        console.warn("webb3 connected  " + web3 );
        UserRepository.setProvider(web3.currentProvider);
-
+       ScoreVoter.setProvider(web3.currentProvider);
 
         this.state = {
           currUser: null,
@@ -61,10 +65,11 @@ class App extends Component {
   }
 
 
-  initContracts = (pUserRepo, pScoreVoter) => {
+  addEventListener = (pScoreVoter) => {
       //console.log('contract objects ' + pUserRepo + " " + pScoreVoter);
       //start listening to events when the auction is created
-      //watchEvents(pAuctionObj, pAuctionId, this.updateStatus);
+      console.log("got score voter instance " + pScoreVoter);
+      watchEvents(pScoreVoter, pScoreVoter, this.messageBoard);
 
   }
 
@@ -93,6 +98,13 @@ class App extends Component {
               }
             });
           });
+
+          //enable event watching for ScoreVoter too
+          ScoreVoter.deployed().then(function(voterInstance) {
+            me.addEventListener(voterInstance) 
+          });
+
+
       } catch (err) {
         me.messageBoard("Err looking for Admin capability  "+ err, true, false);
         return;
@@ -228,7 +240,7 @@ class App extends Component {
                                   </div>
 
                                   {this.state.sub_feature === 'Manage' && 
-                                    <Admin currentUser={this.state.currUser} adminStatus={this.state.isAdmin} onContractDetails={this.initContracts} notifier={this.messageBoard}/>
+                                    <Admin currentUser={this.state.currUser} adminStatus={this.state.isAdmin} notifier={this.messageBoard}/>
                                   } 
 
                                   {this.state.sub_feature === 'Voters' && 
