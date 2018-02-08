@@ -12,6 +12,8 @@ import Result from './Result.js'
 
 //import {watchEvents} from './event-watcher.js'
 
+
+
   var web3 = null;
   var UserRepository = contract(userRepository);
   var me = null;

@@ -55,6 +55,7 @@ contract UserRepositoryImpl is UserRepository{
     function addUser(bytes32 name, address acId) public ownerOnly returns (uint32 newVoterId) {
         userId++;
         users[userId] = User(userId, name, acId, true);
+        wallets[acId] = users[userId];
         return userId;
     }
     
