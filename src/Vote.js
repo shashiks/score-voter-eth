@@ -10,6 +10,7 @@ import VoteOptionList from './VoteOptionList.js';
 import VoteOption from './VoteOption.js';
 import Auth from './auth.js'
 import {TxnConsensus} from './block-verify.js';
+var CONFIG = require('./config.json');
 
 
 
@@ -27,7 +28,7 @@ export default class Vote extends Component {
 	 constructor (props) {
         super(props);
 
-       web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:9090"));
+       web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
        console.warn("webb3 connected  " + web3 );
        UserRepository.setProvider(web3.currentProvider);
        ScoreVoter.setProvider(web3.currentProvider);

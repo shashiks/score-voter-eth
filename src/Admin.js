@@ -10,6 +10,7 @@ import { default as Web3} from 'web3';
 import { default as contract } from 'truffle-contract'
 import userRepository from './contracts/UserRepositoryImpl.json'
 import scoreVoter from './contracts/ScoreVoter.json'
+var CONFIG = require('./config.json');
 
     //var watching = false; //start watching to events only 
     // var passwd = false;
@@ -32,7 +33,7 @@ export default class Admin extends Component {
 
     super(props);
       //the url should come from config /props
-     web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:9090"));
+     web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
      console.warn("webb3 connected  " + web3 );
      UserRepository.setProvider(web3.currentProvider);
      ScoreVoter.setProvider(web3.currentProvider);

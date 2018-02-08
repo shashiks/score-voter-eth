@@ -9,6 +9,7 @@ import scoreVoter from './contracts/ScoreVoter.json'
 import {TxnConsensus} from './block-verify.js';
 import OptInfo from './OptInfo.js';
 import Auth from './auth.js'
+var CONFIG = require('./config.json');
 
     var web3 = null;
     //var UserRepository = contract(userRepository);
@@ -23,7 +24,7 @@ export default class OptMgmt extends Component {
 
     super(props);
       //the url should come from config /props
-     web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:9090"));
+     web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
      console.warn("webb3 connected  " + web3 );
      //UserRepository.setProvider(web3.currentProvider);
      ScoreVoter.setProvider(web3.currentProvider);

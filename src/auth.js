@@ -1,13 +1,9 @@
 //react and Front End imports
 import React, {Component } from 'react';
 import PropTypes from 'prop-types';
-//import { Label, DropdownButton, MenuItem, Form } from 'react-bootstrap'
-
-//Eth libraries
 import { default as Web3} from 'web3';
-
-//contracts
 import { default as contract } from 'truffle-contract'
+var CONFIG = require('./config.json');
 
     var web3 = null;
     var me = null;
@@ -22,7 +18,7 @@ export default class Auth extends Component {
 
     super(props);
       //the url should come from config /props
-     web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:9090"));
+     web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
 
      this.state = {
       message: null

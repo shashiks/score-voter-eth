@@ -13,6 +13,7 @@ import scoreVoter from './contracts/ScoreVoter.json'
 import {TxnConsensus} from './block-verify.js';
 import UserInfo from './UserInfo.js';
 import Auth from './auth.js'
+var CONFIG = require('./config.json');
 
     //var watching = false; //start watching to events only 
     // var passwd = false;
@@ -32,7 +33,7 @@ export default class UserMgmt extends Component {
   constructor (props) {
 
     super(props);
-    web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:9090"));
+    web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
      console.warn("webb3 connected  " + web3 );
      UserRepository.setProvider(web3.currentProvider);
      ScoreVoter.setProvider(web3.currentProvider);

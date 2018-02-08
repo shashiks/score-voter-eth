@@ -12,6 +12,7 @@ import Vote from './Vote.js'
 import Result from './Result.js'
 
 import {watchEvents} from './event-watcher.js'
+var CONFIG = require('./config.json');
 
 //import {watchEvents} from './event-watcher.js'
 
@@ -29,8 +30,8 @@ class App extends Component {
   
   constructor (props) {
         super(props);
-
-       web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:9090"));
+        
+       web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
        console.warn("webb3 connected  " + web3 );
        UserRepository.setProvider(web3.currentProvider);
        ScoreVoter.setProvider(web3.currentProvider);
@@ -114,10 +115,7 @@ class App extends Component {
 
   logout = () => {
     
-    this.setState({currUser : null}); 
-    this.setState({isAdmin : false});
-    this.messageBoard(null, false, false, true);
-    this.setState({sub_feature : 'Options'});
+    //this.setState({currUser : null}) this.setState({isAdmin : false}) this.messageBoard(null, false, false, true) this.setState({sub_feature : 'Options'})
   }
 
 
@@ -143,7 +141,7 @@ class App extends Component {
                                   <a onClick={ () => { this.setState({sub_feature : 'Login'}) } }>Login</a>
                                 </li>
                                 <li>
-                                  <a onClick={ () => { this.logout } }>Logout</a>
+                                  <a onClick={ () => { this.setState({currUser : null}); this.setState({isAdmin : false}); this.messageBoard(null, false, false, true); this.setState({sub_feature : 'Options'}) ;} }>Logout</a>
                                 </li>
 
                               </ul>
@@ -219,7 +217,7 @@ class App extends Component {
                                       <a onClick={ () => { this.setState({sub_feature : 'Result'}) } }>View Result</a>
                                     </li>
                                     <li>
-                                      <a onClick={ () => { this.logout } }>Logout</a>
+                                      <a onClick={ () => { this.setState({currUser : null}); this.setState({isAdmin : false}); this.messageBoard(null, false, false, true); this.setState({sub_feature : 'Options'}) ;} }>Logout</a>
                                     </li>
 
                                   </ul>
@@ -240,7 +238,7 @@ class App extends Component {
                                   </div>
 
                                   {this.state.sub_feature === 'Manage' && 
-                                    <Admin currentUser={this.state.currUser} adminStatus={this.state.isAdmin} notifier={this.messageBoard}/>
+                                    <Admin currentUser={this.state.currUser} adminStatus={this.state.isAdmin}  notifier={this.messageBoard}/>
                                   } 
 
                                   {this.state.sub_feature === 'Voters' && 
@@ -277,7 +275,7 @@ class App extends Component {
                                   <a onClick={ () => { this.setState({sub_feature : 'Vote'}) } }>Vote</a>
                                 </li>
                                 <li>
-                                  <a onClick={ () => { this.logout } }>Logout</a>
+                                  <a onClick={ () => { this.setState({currUser : null}); this.setState({isAdmin : false}); this.messageBoard(null, false, false, true); this.setState({sub_feature : 'Options'}) ;} }>Logout</a>
                                 </li>                                
                               </ul>
                             </li>

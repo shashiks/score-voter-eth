@@ -5,6 +5,7 @@ import UserItem from './UserItem.js'
 import userRepository from './contracts/UserRepositoryImpl.json'
 import { default as contract } from 'truffle-contract'
 import { default as Web3} from 'web3'
+var CONFIG = require('./config.json');
 
 //import {watchEvents} from './event-watcher.js'
 
@@ -19,7 +20,7 @@ export default class VoterReg extends Component {
 	 constructor (props) {
         super(props);
 
-       web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:9090"));
+       web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
        console.warn("webb3 connected  " + web3 );
        UserRepository.setProvider(web3.currentProvider);
         this.state = {
