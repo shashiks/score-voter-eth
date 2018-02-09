@@ -9,7 +9,7 @@ var CONFIG = require('./config.json');
 
 //import {watchEvents} from './event-watcher.js'
 
-  var web3 = null;
+  var web3;
   var UserRepository = contract(userRepository);
   var me = null;
   var userNames = [];
@@ -20,9 +20,6 @@ export default class VoterReg extends Component {
 	 constructor (props) {
         super(props);
 
-       web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
-       console.warn("webb3 connected  " + web3 );
-       UserRepository.setProvider(web3.currentProvider);
         this.state = {
           userNames: null,
           isVoterData: false,        	
@@ -55,6 +52,11 @@ export default class VoterReg extends Component {
     }
 
 	componentDidMount() {
+       web3 = window.web3;
+       console.warn("after webb3 connected  " + web3 );
+       UserRepository.setProvider(web3.currentProvider);
+       ScoreVoter.setProvider(web3.currentProvider);
+
 		this.getUserList();
 	}
 
@@ -73,23 +75,23 @@ export default class VoterReg extends Component {
 		}    	
 
     	return (
-						<div className="card mb-3">
-                        	<div className="card-body">
-								<div className="form-group">
-                            		<label htmlFor="userId">User Names</label>
-                        			<select className="form-control" ref="userId">
-					    				{userNames}
-					    			</select>
-                         		</div>
-								<div className="form-group">
-									<div className="form-row">
-										<div className="col-md-4">
-										  <a className="btn btn-primary btn-block" onClick={this.createUserAccount}>Create Account</a>
-										</div>
-									</div>
-								</div>
-                         	</div>    		
-                        </div>
+			<div className="card mb-3">
+            	<div className="card-body">
+					<div className="form-group">
+                		<label htmlFor="userId">User Names</label>
+            			<select className="form-control" ref="userId">
+		    				{userNames}
+		    			</select>
+             		</div>
+					<div className="form-group">
+						<div className="form-row">
+							<div className="col-md-4">
+							  <a className="btn btn-primary btn-block" onClick={this.createUserAccount}>Create Account</a>
+							</div>
+						</div>
+					</div>
+             	</div>    		
+            </div>
         );
 
     }

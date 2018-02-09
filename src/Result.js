@@ -6,12 +6,11 @@ import { default as Web3} from 'web3';
 
 import { default as contract } from 'truffle-contract'
 import scoreVoter from './contracts/ScoreVoter.json'
-import {TxnConsensus} from './block-verify.js';
 import ResultItem from './ResultItem.js';
 var CONFIG = require('./config.json');
 
 
-    var web3 = null;
+    var web3 ;
     //var UserRepository = contract(userRepository);
     var ScoreVoter = contract(scoreVoter);
 
@@ -23,11 +22,6 @@ export default class OptMgmt extends Component {
   constructor (props) {
 
     super(props);
-      //the url should come from config /props
-     web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
-     console.warn("webb3 connected  " + web3 );
-     //UserRepository.setProvider(web3.currentProvider);
-     ScoreVoter.setProvider(web3.currentProvider);
       this.state = {
           optNames: null,
           optionValue: null,
@@ -41,6 +35,10 @@ export default class OptMgmt extends Component {
 
   componentDidMount() {
     this.props.notifier(null,false,false,true);
+     web3 = window.web3;
+     console.warn("after webb3 connected  " + web3 );
+     ScoreVoter.setProvider(web3.currentProvider);
+
     this.viewResults();
   }
 

@@ -15,7 +15,7 @@ var CONFIG = require('./config.json');
     //var watching = false; //start watching to events only 
     // var passwd = false;
 
-    var web3 = null;
+    var web3;
     var UserRepository = contract(userRepository);
     var ScoreVoter = contract(scoreVoter);
 
@@ -30,21 +30,17 @@ export default class Admin extends Component {
   
 
   constructor (props) {
-
-    super(props);
-      //the url should come from config /props
-     web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
-     console.warn("webb3 connected  " + web3 );
-     UserRepository.setProvider(web3.currentProvider);
-     ScoreVoter.setProvider(web3.currentProvider);
-    
+      super(props);
       me = this;
         
   }
 
   componentDidMount() {
     this.props.notifier(null,false,false,true);
-    // this.props.onContractDetails(UserRepository, ScoreVoter);
+           web3 = window.web3;
+       console.warn("after webb3 connected  " + web3 );
+       UserRepository.setProvider(web3.currentProvider);
+       ScoreVoter.setProvider(web3.currentProvider);
 
   }
 
@@ -53,28 +49,15 @@ export default class Admin extends Component {
 
       try {
           let userRepoAddr = this.refs.userRepositoryId.value; 
-          console.log("userrepo addr " + userRepoAddr);
-
-          ///// CHANGE TO USER AUTH
-          var userId = "0xf09564Ca641B9E3517dFc6f2e3525e7078eEa5A8";
-          var unlocked = web3.personal.unlockAccount(userId, 'welcome123', 10);
-          //var info = '';
-          console.log('unlocked ' + unlocked);
-        //   // if(!unlockaccount(auctioneerHash, phrase)) {
-        //   //   return;
-        //   }
-          // var me = this;
+          let userId = window.web3.eth.defaultAccount;
+          console.log("userrepo addr " + userRepoAddr + " userid " + userId);
 
           ScoreVoter.deployed().then(function(scoreVoterInst) {
             console.log("scoreVoterInst " + scoreVoterInst);
 
-            var res = scoreVoterInst.setUserRepo( userRepoAddr,{gas:1500000,from:userId});
-            console.log ('result of setting repo '+ res);
-            me.props.notifier("User Repository assigned " + res , false, false);
-            // scoreVoterInst.setUserRepo( userRepoAddr ,{gas:1500000,from:userId}).then(function(auction) {
-            //     me.props.notifier("Auction created for "+ auctioneerHash, false, false);
-            //     me.props.onAuctionDetails(auction, auctioneerHash);
-            //  });
+            var res = scoreVoterInst.setUserRepo( userRepoAddr,{gas:2000000,from:userId});
+              console.log ('result of setting repo '+ res);
+              me.props.notifier("User Repository assigned " , false, false);
           });
         } catch (err) {
             me.props.notifier("assining user repo to voter  "+ err, true, false);

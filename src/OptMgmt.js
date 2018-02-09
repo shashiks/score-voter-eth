@@ -11,7 +11,7 @@ import OptInfo from './OptInfo.js';
 import Auth from './auth.js'
 var CONFIG = require('./config.json');
 
-    var web3 = null;
+    var web3;
     //var UserRepository = contract(userRepository);
     var ScoreVoter = contract(scoreVoter);
 
@@ -23,11 +23,7 @@ export default class OptMgmt extends Component {
   constructor (props) {
 
     super(props);
-      //the url should come from config /props
-     web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
-     console.warn("webb3 connected  " + web3 );
-     //UserRepository.setProvider(web3.currentProvider);
-     ScoreVoter.setProvider(web3.currentProvider);
+
       this.state = {
           optNames: null,
           optionValue: null,
@@ -40,38 +36,36 @@ export default class OptMgmt extends Component {
   }
 
   componentDidMount() {
-    this.props.notifier(null,false,false,true);
+        this.props.notifier(null,false,false,true);
+        web3 = window.web3;
+       console.warn("after webb3 connected  " + web3 );
+       ScoreVoter.setProvider(web3.currentProvider);
+
   }
 
 
-  askAuth = () => {
-    this.setState({isOptData:false});
-    this.props.notifier(null, false, false, true);
-
-    //console.log('current user in Usermgmt ' + this.props.currentUser);
-
-    let aName = this.refs.optName.value;
-    if(!aName || aName.length <= 5) {
-      this.props.notifier("Invalid Option value. Please enter name with atleast 5 chars.", true, false);
-      return;
+  validate = (aName) => {
+  
+    if(!aName || aName.length < 3) {
+      this.props.notifier("Invalid Option value. Please enter name with atleast 3 chars.", true, false);
+      return false;
     }
     
-    this.setState({optionValue: aName});
-    this.setState({doAuth: true});
+    return true;
   }
 
-  doAuth = (authStatus, returnProps) => {
+  // doAuth = (authStatus, returnProps) => {
 
-    //close the auth screen
-    this.setState({doAuth: false});
-    if(!authStatus) {
-      me.props.notifier('Transaction Auth Cancelled!', false, false);
-      return;
-    }
+  //   //close the auth screen
+  //   this.setState({doAuth: false});
+  //   if(!authStatus) {
+  //     me.props.notifier('Transaction Auth Cancelled!', false, false);
+  //     return;
+  //   }
         
-    this.addOption();
+  //   this.addOption();
         
-  }
+  // }
 
 
 
@@ -79,21 +73,27 @@ export default class OptMgmt extends Component {
 
   addOption = () => {
 
-    
+    //reset state to not update view
+    this.setState({isOptData:false});
     this.props.notifier(null, false, false, true);
 
+    let optValue = this.refs.optName.value;
+    if(!this.validate(optValue)) {
+      return;
+    }
+    
       try {
 
-          let optValue = this.state.optionValue;
-          let userId = this.props.currentUser;
+          // let optValue = this.state.optionValue;
+          //let userId = this.props.currentUser;
 
           ScoreVoter.deployed().then(function(instance) {
-            // console.log("instance ScoreVoter " + instance);
+            console.log("instance ScoreVoter " + instance + ' ' + optValue);
 
-            instance.addOption.sendTransaction( optValue,{gas:1500000,from:userId}).then(function(txnHash) {
+            instance.addOption.sendTransaction( optValue, {gas:2000000,from: me.props.currentUser}).then(function(txnHash) {
                     console.log("Transaction Id " + txnHash);
                     me.props.notifier("Operation submitted. Txn Id : " + txnHash, false, false, false);
-                    TxnConsensus(web3, txnHash, 3, 4000, 4, function(err, receipt) { 
+                    TxnConsensus(web3, txnHash, 3, 30000, 4, function(err, receipt) { 
                       console.log("Got result from block confirmation" + receipt);
                       if(receipt) {
                         console.log("optName blockHash " + receipt.blockHash);
@@ -150,13 +150,7 @@ export default class OptMgmt extends Component {
       }
 
     return (
-        <div>
 
-            { this.state.doAuth &&
-              <Auth resultCallback={this.doAuth} userId={this.props.currentUser} />
-            }
-
-            {!this.state.doAuth &&
                 <div>        
                   <form>
                     <div className="card mb-3">
@@ -171,7 +165,7 @@ export default class OptMgmt extends Component {
                         <div className="form-group">
                           <div className="form-row">
                             <div className="col-md-4">
-                                <a className="btn btn-primary btn-block" onClick={this.askAuth}>Create Option</a>
+                                <a className="btn btn-primary btn-block" onClick={this.addOption}>Create Option</a>
                             </div>
                           </div>
                         </div>
@@ -198,9 +192,6 @@ export default class OptMgmt extends Component {
                       </div>
                     </div>
                   </div>
-            }
-
-        </div>
     );
   }
 }

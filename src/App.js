@@ -18,24 +18,18 @@ var CONFIG = require('./config.json');
 
 
 
-  var web3 = null;
+  var web3;
   var UserRepository = contract(userRepository);
   var ScoreVoter = contract(scoreVoter);
   var me = null;
 
 class App extends Component {
 
-  // componentDidMount() {}
-  // componentWillUnmount() {}
-  
-  constructor (props) {
+    constructor (props) {
+        console.log('cons');
         super(props);
         
-       web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
-       console.warn("webb3 connected  " + web3 );
-       UserRepository.setProvider(web3.currentProvider);
-       ScoreVoter.setProvider(web3.currentProvider);
-
+       //web3 = new Web3(new Web3.providers.HttpProvider(web3.currentProvider));
         this.state = {
           currUser: null,
           isAdmin: false,
@@ -44,7 +38,54 @@ class App extends Component {
           message: null
         }
         me = this;
+    }
+
+
+
+  componentDidMount() {
+
+       web3 = window.web3;
+       console.warn("after webb3 connected  " + web3 );
+       UserRepository.setProvider(web3.currentProvider);
+       ScoreVoter.setProvider(web3.currentProvider);
+
+       me.initUserProfile();
+
   }
+
+
+  initUserProfile = () => {
+
+       let userId = window.web3.eth.defaultAccount;
+       console.log('current user id ' + userId);
+       this.setState({currUser: userId});
+
+
+      try {
+          UserRepository.deployed().then(function(instance) {
+            console.log("userId in session " + userId);
+            instance.isAdmin.call( userId).then(function(adminStatus) {
+              console.log("curr user is Admin " + adminStatus);
+              if(adminStatus) {
+                me.setState({isAdmin: adminStatus});
+              }
+            });
+          });
+
+          //enable event watching for ScoreVoter too
+          ScoreVoter.deployed().then(function(voterInstance) {
+            me.addEventListener(voterInstance) 
+          });
+
+
+      } catch (err) {
+        me.messageBoard("Err looking for Admin capability  "+ err, true, false);
+        return;
+      }
+
+  }
+
+  
 
 
   messageBoard = (msgVal, isErr, append, clear)  => {
@@ -67,56 +108,49 @@ class App extends Component {
 
 
   addEventListener = (pScoreVoter) => {
-      //console.log('contract objects ' + pUserRepo + " " + pScoreVoter);
-      //start listening to events when the auction is created
       console.log("got score voter instance " + pScoreVoter);
       watchEvents(pScoreVoter, pScoreVoter, this.messageBoard);
 
   }
 
 
-  login = () => {
-      this.messageBoard(null, false, false, true);
+  // login = () => {
+  //     this.messageBoard(null, false, false, true);
 
-      let userId = this.refs.userId.value;
-      let pwd = this.refs.password.value;
-      try {
-       let res =  web3.personal.unlockAccount(userId, pwd, 3);
-       console.log('res of login ' + res);
-      } catch(error) {
-        this.messageBoard("Invalid userId / password. Please try again with valid credentials" , true, false, false);
-        return;
-      }
-      this.setState({currUser: userId});
+  //     let userId = this.refs.userId.value;
+  //     let pwd = this.refs.password.value;
+  //     try {
+  //      let res =  web3.personal.unlockAccount(userId, pwd, 3);
+  //      console.log('res of login ' + res);
+  //     } catch(error) {
+  //       this.messageBoard("Invalid userId / password. Please try again with valid credentials" , true, false, false);
+  //       return;
+  //     }
+  //     this.setState({currUser: userId});
 
-      try {
-          UserRepository.deployed().then(function(instance) {
-            console.log("userId in repo " + userId);
-            instance.isAdmin.call( userId).then(function(adminStatus) {
-              console.log("curr user is Admin " + adminStatus);
-              if(adminStatus) {
-                me.setState({isAdmin: adminStatus});
-              }
-            });
-          });
+  //     try {
+  //         UserRepository.deployed().then(function(instance) {
+  //           console.log("userId in repo " + userId);
+  //           instance.isAdmin.call( userId).then(function(adminStatus) {
+  //             console.log("curr user is Admin " + adminStatus);
+  //             if(adminStatus) {
+  //               me.setState({isAdmin: adminStatus});
+  //             }
+  //           });
+  //         });
 
-          //enable event watching for ScoreVoter too
-          ScoreVoter.deployed().then(function(voterInstance) {
-            me.addEventListener(voterInstance) 
-          });
+  //         //enable event watching for ScoreVoter too
+  //         ScoreVoter.deployed().then(function(voterInstance) {
+  //           me.addEventListener(voterInstance) 
+  //         });
 
 
-      } catch (err) {
-        me.messageBoard("Err looking for Admin capability  "+ err, true, false);
-        return;
-      }
+  //     } catch (err) {
+  //       me.messageBoard("Err looking for Admin capability  "+ err, true, false);
+  //       return;
+  //     }
 
-  }
-
-  logout = () => {
-    
-    //this.setState({currUser : null}) this.setState({isAdmin : false}) this.messageBoard(null, false, false, true) this.setState({sub_feature : 'Options'})
-  }
+  // }
 
 
   render() {
@@ -125,74 +159,7 @@ class App extends Component {
 
             <div>
 
-                {this.state.currUser === null && 
-                      <div>
-                      <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
-                        <div className="collapse navbar-collapse" id="navbarResponsive">
-                          <ul className="navbar-nav navbar-sidenav" id="exampleAccordion">
-
-                             <li className="nav-item" data-toggle="tooltip" data-placement="right" title="Survey Admin">
-                              <a onClick={ () => { this.setState({sub_feature : 'Login'})  } }  className="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseExamplePages" data-parent="#exampleAccordion">
-                                
-                                <span className="nav-link-text">Login</span>
-                              </a>
-                              <ul className="sidenav-second-level collapse" id="collapseExamplePages">
-                                <li>
-                                  <a onClick={ () => { this.setState({sub_feature : 'Login'}) } }>Login</a>
-                                </li>
-                                <li>
-                                  <a onClick={ () => { this.setState({currUser : null}); this.setState({isAdmin : false}); this.messageBoard(null, false, false, true); this.setState({sub_feature : 'Options'}) ;} }>Logout</a>
-                                </li>
-
-                              </ul>
-                            </li>
-                          </ul>
-                        </div>
-                      </nav>
-
-                      <div className="content-wrapper">
-                        <div className="container-fluid">
-                            <ol className="breadcrumb">
-                              
-                              <li className="breadcrumb-item">{this.state.sub_feature}</li>
-                            </ol>
-                            
-                              <div className="card-header"> 
-                                    <div dangerouslySetInnerHTML={{__html: this.state.message}} />
-                              </div>
-
-                                {this.state.sub_feature === 'Login' && 
-                                    <div className="card mb-3">
-                                    <div className="card-header">Login</div>
-                                      <div className="card-body">
-                                        <div className="table-responsive">
-                                          <table className="table table-bordered" id="dataTable" width="100%" cellSpacing="0">
-                                            <tbody>
-                                              <tr>
-                                                <td>User Id</td>
-                                                <td><a><input className="form-control" ref="userId" defaultValue="0xf09564Ca641B9E3517dFc6f2e3525e7078eEa5A8"  placeholder="User Id" /></a></td>
-                                              </tr>
-                                              <tr>
-                                                <td>Password</td>
-                                                <td><a><input className="form-control" ref="password" type="password" defaultValue="welcome123" placeholder="password" /></a></td>
-                                              </tr>
-                                              <tr>
-                                                <td><a className="btn btn-primary btn-block" onClick={this.login}>Login</a></td>
-                                                <td>&nbsp;</td>
-                                              </tr>
-                                            </tbody>
-                                          </table>                
-                                        </div>
-                                    </div>
-                                  </div>
-                                 }                                  
-                              </div> 
-                            </div>
-                          </div>
-                }
-
-
-                {this.state.currUser != null && this.state.isAdmin && 
+                  {this.state.currUser != null && this.state.isAdmin && 
                       <div>
                             <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
                             <div className="collapse navbar-collapse" id="navbarResponsive">
@@ -256,10 +223,9 @@ class App extends Component {
                               </div> 
                             </div>   
                           </div>              
-                }
+                    }
 
-
-                {this.state.currUser != null && !this.state.isAdmin && 
+                  {this.state.currUser != null && !this.state.isAdmin && 
                     <div>
                       <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
                         <div className="collapse navbar-collapse" id="navbarResponsive">
@@ -301,6 +267,9 @@ class App extends Component {
                             </div>
                           </div>                  
                 }
+
+
+               
 
             </div>                
       

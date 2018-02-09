@@ -1,3 +1,4 @@
 {
-    "gethUrl": "http://localhost:9090"
+    "localgethUrl": "http://localhost:9090",
+    "gethUrl": "https://rinkeby.infura.io/4tyFJoKtfMPAzxBwkHoM"
 }

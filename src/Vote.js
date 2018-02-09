@@ -14,7 +14,7 @@ var CONFIG = require('./config.json');
 
 
 
-  var web3 = null;
+  var web3;
   var UserRepository = contract(userRepository);
   var ScoreVoter = contract(scoreVoter);
   var me = null;
@@ -25,13 +25,22 @@ var CONFIG = require('./config.json');
 export default class Vote extends Component {
 
 
+  componentDidMount() {
+    //this.checkUserVotedStatus();
+
+    this.props.notifier(null,false,false,true);
+    web3 = window.web3;
+    console.warn("after webb3 connected  " + web3 );
+    UserRepository.setProvider(web3.currentProvider);
+    ScoreVoter.setProvider(web3.currentProvider);
+    this.initOptionList();
+
+  }
+
+
 	 constructor (props) {
         super(props);
 
-       web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
-       console.warn("webb3 connected  " + web3 );
-       UserRepository.setProvider(web3.currentProvider);
-       ScoreVoter.setProvider(web3.currentProvider);
         this.state = {
           optNames: null,
           optionValue: null,
@@ -47,49 +56,27 @@ export default class Vote extends Component {
 
 
 
-    authAndStore = (scoresMap) => {
+    // authAndStore = (scoresMap) => {
 
-      console.log('got map of scores ' + scoresMap);
-      // for (var [key, value] of scoresMap) {
-      //    console.log(key + ' = ' + value);
-      // }
-      this.state.resultScores = scoresMap;
-      this.askAuth();
+    //   console.log('got map of scores ' + scoresMap);
+    //   // for (var [key, value] of scoresMap) {
+    //   //    console.log(key + ' = ' + value);
+    //   // }
+    //   this.state.resultScores = scoresMap;
+    //   this.vote();
 
-    }
+    // }
 
-    askAuth = () => {
-    
-    	this.props.notifier(null, false, false, true);
-	    console.log('current user in vote ' + this.props.currentUser  + " isAdmin " + this.props.isAdmin);
 
-	    //do vote validations here of no two options haveing same value
-
-	    // let aName = this.refs.optName.value;
-	    
-	    //this.setState({optionValue: aName});
-	    this.setState({doAuth: true});
-	}
-
-	doAuth = (authStatus, returnProps) => {
-	    //close the auth screen
-	    this.setState({doAuth: false});
-	    if(!authStatus) {
-	      me.props.notifier('Transaction Auth Cancelled!', false, false);
-	      return;
-		}
-	    
-	   	this.vote();
-  	}
-
-  	vote = () => {
+  	vote = (scoresMap) => {
+      
   		console.log('current user in vote ' + this.props.currentUser  + " isAdmin " + this.props.adminStatus);
   		console.log('vote called score values ');
       //instead of running two iterators for map and value
       //store them in separate arrays in one go and call vote on contract
       let keys= [];
       let vals= []; 
-      for (var [key, value] of this.state.resultScores) {
+      for (var [key, value] of scoresMap) {
          //console.log(key + ' = ' + value);
          keys.push(parseInt(key));
          vals.push(parseInt(value));
@@ -106,15 +93,13 @@ export default class Vote extends Component {
             instance.vote.sendTransaction( me.props.currentUser, keys, vals, {gas:4712300,from: me.props.currentUser}).then(function(txnHash) {
                     console.log("Vote Txn Id " + txnHash);
                     me.props.notifier("Your votes are being submitted. Txn Id : " + txnHash, false, false, false);
-                    TxnConsensus(web3, txnHash, 3, 4000, 4, function(err, receipt) { 
+                    TxnConsensus(web3, txnHash, 3, 30000, 4, function(err, receipt) { 
                       console.log("Vote txn " + receipt);
                       if(receipt) {
                         console.log("Vote blockHash " + receipt.blockHash);
                         console.log("Vote blockNumber " + receipt.blockNumber);
                         console.log("Vote transactionIndex " + receipt.transactionIndex);            
-                            instance.getOptionIdCount.call().then(function(lastOptId) {
-                              me.props.notifier("Voting complete for " + me.props.currentUser, false, true, false);
-                            });
+                            
                       } else {
                         console.log("err from poll " + err);
                         me.props.notifier("Error voting for user " + me.props.currentUser + err, true, false);
@@ -176,10 +161,6 @@ export default class Vote extends Component {
 
   }
 
-	componentDidMount() {
-    //this.checkUserVotedStatus();
-		this.initOptionList();
-	}
 
     render () {
 
@@ -198,7 +179,7 @@ export default class Vote extends Component {
             	}
 
             {!this.state.doAuth && this.state.isOptData && 
-              <VoteOptionList optionIds={optNames} onSubmit={this.authAndStore} notifier={this.props.notifier}/> 
+              <VoteOptionList optionIds={optNames} onSubmit={this.vote} notifier={this.props.notifier}/> 
             }
 
 

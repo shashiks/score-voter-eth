@@ -5,21 +5,22 @@ import { default as Web3} from 'web3';
 import { default as contract } from 'truffle-contract'
 var CONFIG = require('./config.json');
 
-    var web3 = null;
+    var web3;
     var me = null;
 
 export default class Auth extends Component {
 
-  // componentDidMount() {}
+  componentDidMount() {
+      web3 = window.web3;
+       console.warn("after webb3 connected  " + web3 );
+
+  }
   // componentWillUnmount() {}
   
 
   constructor (props) {
 
     super(props);
-      //the url should come from config /props
-     web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
-
      this.state = {
       message: null
      }

@@ -18,7 +18,7 @@ var CONFIG = require('./config.json');
     //var watching = false; //start watching to events only 
     // var passwd = false;
 
-    var web3 = null;
+    var web3;
     var UserRepository = contract(userRepository);
     var ScoreVoter = contract(scoreVoter);
 
@@ -33,10 +33,6 @@ export default class UserMgmt extends Component {
   constructor (props) {
 
     super(props);
-    web3 = new Web3(new Web3.providers.HttpProvider(CONFIG.gethUrl));
-     console.warn("webb3 connected  " + web3 );
-     UserRepository.setProvider(web3.currentProvider);
-     ScoreVoter.setProvider(web3.currentProvider);
       this.state = {
           uname: null,
           uAc: null,
@@ -49,58 +45,60 @@ export default class UserMgmt extends Component {
 
   componentDidMount() {
     this.props.notifier(null,false,false,true);
-    //this.props.onContractDetails(UserRepository, ScoreVoter);
+       web3 = window.web3;
+       console.warn("after webb3 connected  " + web3 );
+       UserRepository.setProvider(web3.currentProvider);
+       ScoreVoter.setProvider(web3.currentProvider);
 
   }
 
-  askAuth = () => {
+  validateInput = (aName, addr) => {
 
-    this.setState({isVoterData:false});
-    this.props.notifier(null, false, false, true);
-
-    //console.log('current user in Usermgmt ' + this.props.currentUser);
-
-    let aName = this.refs.userName.value;
+    
     if(!aName || aName.length <= 2) {
       this.props.notifier("Invalid User Name. Please enter name with atleast 3 chars.", true, false);
-      return;
+      return false;
     }
     
-    let addr = this.refs.userAc.value;
-
-    this.setState({uname: aName});
-    this.setState({uAc: addr});
-    this.setState({doAuth: true});
-  }
-
-  doAuth = (authStatus, returnProps) => {
-
-    //close the auth screen
-    this.setState({doAuth: false});
-    if(!authStatus) {
-      me.props.notifier('Transaction Auth Cancelled!', false, false);
-      return;
+    
+    if(!addr || addr.length < 35) {
+      this.props.notifier("Invalid User Account. Please enter a valid value.", true, false);
+      return false;
     }
-        
-    this.addUser();
-        
+
+    return true;
+
   }
+
+  // doAuth = (authStatus, returnProps) => {
+
+  //   //close the auth screen
+  //   this.setState({doAuth: false});
+  //   if(!authStatus) {
+  //     me.props.notifier('Transaction Auth Cancelled!', false, false);
+  //     return;
+  //   }
+        
+  //   this.addUser();
+        
+  // }
 
 
 
 
   addUser = () => {
 
+    let uname = this.refs.userName.value;
+    let addr = this.refs.userAc.value;
+
+    this.setState({isVoterData:false});
     this.props.notifier(null, false, false, true);
+    if(!this.validateInput(uname, addr)) {
+      return;
+    }
 
       try {
           
-          let uname = this.state.uname;
-          let addr = this.state.uAc;
-          // let userId = this.props.currentUser;
-
-          // console.log('states ' + this.state.uname + " " + this.state.currUser + " " + );
-
           UserRepository.deployed().then(function(instance) {
             console.log("instance userRepo " + instance);
 
@@ -108,7 +106,7 @@ export default class UserMgmt extends Component {
             instance.addUser.sendTransaction( uname, addr, {gas:4712300,from: me.props.currentUser}).then(function(txnHash) {
                     console.log("Transaction Id " + txnHash);
                     me.props.notifier("Operation submitted. Txn Id : " + txnHash, false, false, false);
-                    TxnConsensus(web3, txnHash, 3, 4000, 4, function(err, receipt) { 
+                    TxnConsensus(web3, txnHash, 3, 30000, 4, function(err, receipt) { 
                       console.log("Got result from block confirmation" + receipt);
                       if(receipt) {
                         console.log("userId blockHash " + receipt.blockHash);
@@ -116,9 +114,6 @@ export default class UserMgmt extends Component {
                         console.log("userId transactionIndex " + receipt.transactionIndex);            
                             instance.getUserCount.call().then(function(lastUserId) {
                               me.props.notifier("User " + uname + " added successfully with Id :: " + lastUserId , false, true, false);
-                                  //reset values
-                                  me.setState({uname: null});
-                                  me.setState({uAc: null});
                             });
                       } else {
                         console.log("err from poll " + err);
@@ -172,13 +167,7 @@ export default class UserMgmt extends Component {
       }
 
     return (
-        <div>  
 
-            { this.state.doAuth &&
-              <Auth resultCallback={this.doAuth} userId={this.props.currentUser} />
-            }
-
-            {!this.state.doAuth &&
              <div> 
                     <form>
                       <div className="card mb-3">
@@ -197,7 +186,7 @@ export default class UserMgmt extends Component {
                           <div className="form-group">
                             <div className="form-row">
                               <div className="col-md-4">
-                                  <a className="btn btn-primary btn-block" onClick={this.askAuth}>Add User</a>
+                                  <a className="btn btn-primary btn-block" onClick={this.addUser}>Add User</a>
                               </div>
                             </div>
                           </div>
@@ -224,8 +213,6 @@ export default class UserMgmt extends Component {
                         </div>
                       </div>
               </div>
-            }
-        </div>
     );
   }
 }
