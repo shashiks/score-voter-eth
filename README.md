@@ -6,6 +6,7 @@ This is a demo project with samples for :
 
 <p>It uses ReactJS as the frontend framework, bootstrap for layouts, webpack for packaging.<p>
 <p>Truffle is used for communicating with ETH and deploying code to blockchain</p>
+<p>MetaMask integration for interacting Rinkeby Test Net</p>
 
 Feel free to use this as a template to get started on these technologies.
 </br>
@@ -18,16 +19,16 @@ to validate and get details of voters voting for options.
 <p>After the deployment of contracts to the blockchain the flow at a high level is as follows:
 <ol>
 <li>Admin creates a list of Options for the survey.</li>
-<li>Admin also creates a list of users using just the names.</li>
-<li>User registers by selecting his name and generates a wallet for himself. This will require a password too. (not providing update of password for now),</li>
+<li>User needs to provide a metamask user account on (Rinkeby for now or any selected network) to the admin before his user account can be created by Admin
+<li>Admin creates a list of users using  name and user account (should be an ETH address)</li> 
 <li>User goes to Survey options list. and selects a score for each option. Score to be between 1 and n where 'n' being the number of options available</li>
 <li>User can cancel anytime before submitting his survey</li>
-<li>A voter needs the password used while creating wallet to vote. Once voted he/she cannot vote again.</li>
+<li>User has to use the account provided earlier to admin for voting. Once voted he/she cannot vote again.</li>
 <li>Once voting is over. i.e. all users have voted Admin can go and look at results.</li>
 </ol>
 
 <p>A known issue for now would be
-<p> In Step 3 - user can select invalid name (someone else's name) - but this is for internal use only for now, so I am not adding complexity there.
+<p> The Registration process is manual for now. This can be automated later. 
 
 
 
