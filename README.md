@@ -30,7 +30,10 @@ to validate and get details of voters voting for options.
 <p>A known issue for now would be
 <p> The Registration process is manual for now. This can be automated later. 
 
-
+<p>
+The <pre>tags.js</pre</pre> file should contain the random key words from your vault that will be used
+to connect to Etehreum via Infura. This file is ignored under ,gitignore to keep your person data 
+offline. <b>Make sure you never commit these keywords to your repo</b>
 
 
 Bootstrap theme template is from https://startbootstrap.com/template-overviews/sb-admin/
