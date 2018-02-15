@@ -1,0 +1,3 @@
+{
+"mnemonic": "<YOUR PHRASE HERE>"
+}
