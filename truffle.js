@@ -1,5 +1,5 @@
 const HDWalletProvider = require('truffle-hdwallet-provider')
-const tag = require('./tags.js')
+const tag = require('./tags.json')
 
 const mnemonic = tag.mnemonic
 
