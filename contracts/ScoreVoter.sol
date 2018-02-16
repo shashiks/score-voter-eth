@@ -9,6 +9,13 @@ contract ScoreVoter {
 
     uint32 private votedCount = 0;
     uint32 private optionId = 0;
+
+    /**
+        Assigned in constructor to define an expiry.
+        Not used to process anything for now
+     */
+    uint256 private expiryTime;
+
     
     //list of options
     mapping(uint32 => Option) options;
@@ -81,12 +88,14 @@ contract ScoreVoter {
     /**
      * Constructor
      */
-    function ScoreVoter() public {
-        owner = msg.sender;
+    function ScoreVoter(address repoAddr, address myowner, uint256 pEndtime) public {
+        owner = myowner;
+        expiryTime = pEndtime;
+        userRepo = UserRepository(repoAddr);
     }
 
 
-    //DEPENDENCY INJECTION
+    //DEPENDENCY INJECTION - not used after factory
     function setUserRepo(address repoAddr) public ownerOnly {
         userRepo = UserRepository(repoAddr);
     }
@@ -95,11 +104,11 @@ contract ScoreVoter {
     //voting validation data
     function initVotingFor(address vId) public {
         
-        if(!validateVoting(vId)) {
+        if (!validateVoting(vId)) {
             return;
         }
         
-        if(voting[vId] == true) {
+        if (voting[vId] == true) {
             InProcess(vId);
             return;
         }
@@ -117,14 +126,14 @@ contract ScoreVoter {
     //voting
     function vote(address userId, uint32[] optId, uint32[] optScore) public {
 
-        if(!validateVoting(userId)) {
+        if (!validateVoting(userId)) {
             return;
         }
         
         //add the list of options for this voter and increment the score of each option
         //uint32 i = 1;
         uint32 j = 0;
-        for(j = 0; j< optionId; j++) {
+        for (j = 0; j < optionId; j++) {
             votes[userId].push(Vote( {optionId: optId[j], score:optScore[j] } ));
             options[optId[j]].score += optScore[j];
         }
@@ -143,9 +152,9 @@ contract ScoreVoter {
     function updateStatus() public {
 
         uint32 userCount = userRepo.getUserCount();
-        for(uint32 i = 1; i <= userCount; i++) {
+        for (uint32 i = 1; i <= userCount; i++) {
             address uaddr = userRepo.getWalletById(i);
-            if(voted[uaddr] == false) {
+            if (voted[uaddr] == false) {
                 IncomleteVoting(uaddr);
                 return;
             }
@@ -160,13 +169,13 @@ contract ScoreVoter {
         
         //check if the wallet is registered
         //not doing revert to send an event that is readable
-        if(!userRepo.isUserExistsByWallet(userId)) {
+        if (!userRepo.isUserExistsByWallet(userId)) {
             InvalidUserId(userId);
             return false;
         }
 
         // voter not to have voted earlier
-        if(voted[userId] == true) {
+        if (voted[userId] == true) {
             DoubleVoting(userId);
             return false;
         }
@@ -175,7 +184,7 @@ contract ScoreVoter {
     }
 
     ///// OPTION FUNCTIONS
-    function addOption(bytes32 name) ownerOnly public returns (uint32 newOptId)  {
+    function addOption(bytes32 name) ownerOnly public returns (uint32 newOptId) {
         
         optionId++;
         options[optionId] = Option(optionId, name, 0);
@@ -197,11 +206,22 @@ contract ScoreVoter {
         //can check status before returning so that
         //results are readable only after isActive is false
         //assert(!isActive);
-        bytes32 opt =getOptionById(optId);
+        bytes32 opt = getOptionById(optId);
         return ( opt, options[optId].score);
     }
 
-
-  
+    /**
+     * Returns user info along with voting status of that user for client app 
+     * 
+     */ 
+    function getUserWithStatus(uint32 userId) constant public returns (uint32 uid, bytes32 name, address wallet, bool hasVoted) {
+        uint32 resUserId;
+        bytes32 resUserName;
+        address resUserAddress;
+        bool resUserExists;
+        (resUserId, resUserName, resUserAddress, resUserExists)  = userRepo.getUserDetailsById(userId);
+        
+        return (resUserId, resUserName, resUserAddress, voted[resUserAddress]);
+    }
     
 }

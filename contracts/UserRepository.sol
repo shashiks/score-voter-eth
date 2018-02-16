@@ -15,6 +15,11 @@ contract UserRepository {
     
     function getWalletById(uint32 id) public returns (address wallet);
     
+    /**
+     * Returning the id seems redundant here but it would help when client is async and
+     * the value returned can be checked to correspond to the param id. Especially when
+     * receving multiple values from different clients
+     */
     function getUserDetailsById(uint32 id) public returns (uint32 userId, bytes32 name, address wallet, bool exists);
     
     function getUserDetailsByWallet(address wallet) public returns (uint32 userId, bytes32 name, address walAddr, bool exists);
@@ -28,6 +33,3 @@ contract UserRepository {
     
 
 }
-
-
-

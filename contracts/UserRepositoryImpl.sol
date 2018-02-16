@@ -2,7 +2,7 @@ pragma solidity ^0.4.11;
 
 import './UserRepository.sol';
 
-contract UserRepositoryImpl is UserRepository{
+contract UserRepositoryImpl is UserRepository {
     
     
     uint32 version = 4;
@@ -33,7 +33,13 @@ contract UserRepositoryImpl is UserRepository{
     	require(msg.sender == repoOwner);
         _;
 	}
-    
+
+    modifier idLimitOnly(uint32 id) {
+    	assert (id > 0 && id <= userId);
+        _;
+	}
+
+
     //events
     
     //to indicate that address is already added for user
@@ -46,8 +52,8 @@ contract UserRepositoryImpl is UserRepository{
     /**
      * Constructor init the repoOwner
      */
-    function UserRepositoryImpl() public {
-        repoOwner = msg.sender;
+    function UserRepositoryImpl(address pRepoOwner) public {
+        repoOwner = pRepoOwner;
     }
 
     // repo interface functions
@@ -59,17 +65,17 @@ contract UserRepositoryImpl is UserRepository{
         return userId;
     }
     
-    function removeUser(uint32 id) public ownerOnly {
+    function removeUser(uint32 id) public ownerOnly idLimitOnly(id) {
        delete users[id];
     }
     
     function updateUserWallet(uint32 id, address walAddr) public returns (bool) {
         
-        if(!users[id].exists) {
+        if (!users[id].exists) {
             return false;
         }
         
-        if(users[id].walletAddr != 0x0) {
+        if (users[id].walletAddr != 0x0) {
             CantUpdateWallet(id);
             return false;
         }
@@ -88,13 +94,13 @@ contract UserRepositoryImpl is UserRepository{
         return userId;
     }
 
-    function getUserDetailsById(uint32 id) public returns (uint32 uid, bytes32 name, address wallet, bool isExist) {
-        
+    function getUserDetailsById(uint32 id) public idLimitOnly(id) returns (uint32 uid, bytes32 name, address wallet, bool isExist) {
+
         User storage u = users[id];
         return (u.id, u.name, u.walletAddr, u.exists);
     }
     
-    function getWalletById(uint32 id) public returns (address wallet) {
+    function getWalletById(uint32 id) public idLimitOnly(id) returns (address wallet) {
         return users[id].walletAddr;
     }
      
