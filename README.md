@@ -11,10 +11,12 @@ This is a demo project with samples for :
 Feel free to use this as a template to get started on these technologies.
 </br>
 <p>It consists of a Voting Contract and a UserRepository interface and its impl.
+<p>The factory version uses a factory to create a Contract. In addition it also provides for using any the last user repository
+	associated with the user id to be reused for a new contract being created.
+	The user repo is auto injected in the new contract as per new version and it does not need to be set by admin.
 <p>The interface is defined so that the user repo and the process of registration and validations can be changed in future
 as required.
-<p>The Voting contract expects an address of any Contract implementing the UserRepository interface to be injected for it
-to validate and get details of voters voting for options.
+
 
 <p>After the deployment of contracts to the blockchain the flow at a high level is as follows:
 <ol>
@@ -34,6 +36,8 @@ to validate and get details of voters voting for options.
 The <pre>tags.js</pre</pre> file should contain the random key words from your vault that will be used
 to connect to Etehreum via Infura. This file is ignored under ,gitignore to keep your person data 
 offline. <b>Make sure you never commit these keywords to your repo</b>
+
+<p>TODO: THe ui pages still need to be updated to use the factory and change calls using these objects.</p>
 
 
 Bootstrap theme template is from https://startbootstrap.com/template-overviews/sb-admin/
